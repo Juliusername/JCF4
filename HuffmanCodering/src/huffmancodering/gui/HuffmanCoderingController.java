@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -55,6 +54,72 @@ public class HuffmanCoderingController implements Initializable {
         //Stap 2
         frequentie = sorteerFrequentie(frequentie);
         
+        Collections.reverse(frequentie);
+        
+        //Stap 4
+        int total = 0;
+        
+        for (CharacterFreq cf : frequentie)
+        {
+            total += cf.getFrequence();
+        }
+        
+        
+        HashMap<Character, String> boom = new HashMap();
+        
+        
+        
+        String code = "";
+        boolean left = false;
+        
+        for (int i = 0; i < frequentie.size(); i++)
+        {
+            int f = frequentie.get(i).getFrequence();
+            total -= f;
+            if (f < total)
+            {
+                boom.put(frequentie.get(i).getCharacter(), code + "0");
+                
+                
+                if (!left)
+                {
+                    code += "1";
+                }
+                
+                left = true;
+            }
+            else
+            {
+                if (!left)
+                {
+                    boom.put(frequentie.get(i).getCharacter(), code + "0");
+                    
+                    left = true;
+                }
+                else
+                {
+                    boom.put(frequentie.get(i).getCharacter(), code + "1");
+                    
+                    code += "0";
+                    
+                    left = false;
+                }
+            }
+//            else
+//            {
+//                boom.put(frequentie.get(i).getCharacter(), code + "1");
+//                
+//                if (left)
+//                {
+//                    code += "0";
+//                }
+//                
+//                left = false;
+//            }
+            
+            
+        }
+        
         
         
         //PRINT
@@ -62,6 +127,13 @@ public class HuffmanCoderingController implements Initializable {
         for (CharacterFreq cf : frequentie)
         {
             output += cf.getCharacter() + "\t" + "\t" + cf.getFrequence() + "\n";
+        }
+        
+        output += "\n" + "\n";
+        
+        for (Map.Entry<Character, String> entry : boom.entrySet())
+        {
+            output += entry.getKey() + "\t" + "\t" + entry.getValue() + "\n";
         }
         taOutput.setText(output);
     }
