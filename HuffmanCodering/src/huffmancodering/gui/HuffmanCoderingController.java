@@ -1,4 +1,4 @@
-package woordenapplicatie.gui;
+package huffmancodering.gui;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -8,7 +8,6 @@ package woordenapplicatie.gui;
 
 
 
-import huffmancodering.gui.CharacterFreq;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +29,8 @@ import javafx.scene.control.TextArea;
 public class HuffmanCoderingController implements Initializable {
     
    private static final String DEFAULT_TEXT =   "Bananen";
+   private static String level = "";
+   //private HashMap
     
     @FXML
     private Button btnCodeer;
@@ -45,66 +46,145 @@ public class HuffmanCoderingController implements Initializable {
         taInput.setText(DEFAULT_TEXT);
     }
     
+    private void makeTree(List<Node> tree)
+    {
+        Node left = tree.get(0);
+        Node right = tree.get(1);
+        int f = left.freq + right.freq;
+        Node n = new Node('*', f, left, right);
+        tree.add(n);
+        tree.remove(0);
+        tree.remove(0);
+        if (tree.size() == 1) {
+            return;
+        }
+        else{
+            Collections.sort(tree);
+            makeTree(tree);
+        }
+    }
+    
+    private void print(Node n)
+    {
+        System.out.println(n.letter + "\t" + n.freq);
+        if (n.left != null) {
+            print(n.left);
+        }
+        if (n.right != null) {
+            print(n.right);
+        }
+    }
+    
+    private void code(Node tree)
+    {
+        if (tree.letter == '*') {
+            level+= 0;
+            code(tree.left);
+            level = level.substring(0, level.length() - 1);
+            level += 1;
+            code(tree.right);
+            level = level.substring(0, level.length() - 1);
+        }
+        else{
+            tree.code = level;
+            System.out.println(tree.letter + "\t" + tree.code);
+        }
+    }
+    
     @FXML
     private void codeerAction(ActionEvent event) {
         
+        level = "";
         //Stap 1
         List<CharacterFreq> frequentie = getFrequentie(taInput.getText());
         
         //Stap 2
         frequentie = sorteerFrequentie(frequentie);
+        List<Node> tree = new ArrayList<>();
         
-        Collections.reverse(frequentie);
-        
-        //Stap 4
-        int total = 0;
-        
-        for (CharacterFreq cf : frequentie)
+        for(CharacterFreq c : frequentie)
         {
-            total += cf.getFrequence();
+            tree.add(new Node(c.getCharacter(), c.getFrequence(), null, null));
         }
         
+        Node treeN = null;
+        makeTree(tree);
         
-        HashMap<Character, String> boom = new HashMap();
+        treeN = tree.get(0);
+        //print(treeN);
+        code(treeN);
+        char[] text = taInput.getText().toCharArray();
+        String Code = "";
+        for (char c : text) {
+            Code += "";
+        }
         
-        
-        
-        String code = "";
-        boolean left = false;
-        
-        for (int i = 0; i < frequentie.size(); i++)
+        //PRINT
+        String output = "";
+        for (CharacterFreq cf : frequentie)
         {
-            int f = frequentie.get(i).getFrequence();
-            total -= f;
-            if (f < total)
-            {
-                boom.put(frequentie.get(i).getCharacter(), code + "0");
-                
-                
-                if (!left)
-                {
-                    code += "1";
-                }
-                
-                left = true;
-            }
-            else
-            {
-                if (!left)
-                {
-                    boom.put(frequentie.get(i).getCharacter(), code + "0");
-                    
-                    left = true;
-                }
-                else
-                {
-                    boom.put(frequentie.get(i).getCharacter(), code + "1");
-                    
-                    code += "0";
-                    
-                    left = false;
-                }
-            }
+            output += cf.getCharacter() + "\t" + "\t" + cf.getFrequence() + "\n";
+        }
+        
+//        output += "\n" + "\n";
+//        
+//        for (Node n : boom.entrySet())
+//        {
+//            output += entry.getKey() + "\t" + "\t" + entry.getValue() + "\n";
+//        }
+        taOutput.setText(output);
+        
+//        Collections.reverse(frequentie);
+//        
+//        //Stap 4
+//        int total = 0;
+//        
+//        for (CharacterFreq cf : frequentie)
+//        {
+//            total += cf.getFrequence();
+//        }
+//        
+//        
+//        HashMap<Character, String> boom = new HashMap();
+//        
+//        
+//        
+//        String code = "";
+//        boolean left = false;
+//        
+//        for (int i = 0; i < frequentie.size(); i++)
+//        {
+//            int f = frequentie.get(i).getFrequence();
+//            total -= f;
+//            if (f < total)
+//            {
+//                boom.put(frequentie.get(i).getCharacter(), code + "0");
+//                
+//                
+//                if (!left)
+//                {
+//                    code += "1";
+//                }
+//                
+//                left = true;
+//            }
+//            else
+//            {
+//                if (!left)
+//                {
+//                    boom.put(frequentie.get(i).getCharacter(), code + "0");
+//                    
+//                    left = true;
+//                }
+//                else
+//                {
+//                    boom.put(frequentie.get(i).getCharacter(), code + "1");
+//                    
+//                    code += "0";
+//                    
+//                    left = false;
+//                }
+//            }
 //            else
 //            {
 //                boom.put(frequentie.get(i).getCharacter(), code + "1");
@@ -116,26 +196,26 @@ public class HuffmanCoderingController implements Initializable {
 //                
 //                left = false;
 //            }
-            
-            
-        }
-        
-        
-        
-        //PRINT
-        String output = "";
-        for (CharacterFreq cf : frequentie)
-        {
-            output += cf.getCharacter() + "\t" + "\t" + cf.getFrequence() + "\n";
-        }
-        
-        output += "\n" + "\n";
-        
-        for (Map.Entry<Character, String> entry : boom.entrySet())
-        {
-            output += entry.getKey() + "\t" + "\t" + entry.getValue() + "\n";
-        }
-        taOutput.setText(output);
+//            
+//            
+//        }
+//        
+//        
+//        
+//        //PRINT
+//        String output = "";
+//        for (CharacterFreq cf : frequentie)
+//        {
+//            output += cf.getCharacter() + "\t" + "\t" + cf.getFrequence() + "\n";
+//        }
+//        
+//        output += "\n" + "\n";
+//        
+//        for (Map.Entry<Character, String> entry : boom.entrySet())
+//        {
+//            output += entry.getKey() + "\t" + "\t" + entry.getValue() + "\n";
+//        }
+//        taOutput.setText(output);
     }
 
     @FXML
